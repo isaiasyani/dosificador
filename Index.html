@@ -63,43 +63,67 @@
                                      <h1 class="modal-title fs-5" id="exampleModalLabel">¡Bienvenido a HIMALAYA!</h1>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <div class="modal-body">
-                                  <div class="card-body">
-                                      <h5 class="card-title">Mani</h5>
-                                      <p class="card-text"><b>Precio: $500 /gramo</b></p>
-                                      <input type="number" id="cantidad" placeholder="Ingrese la cantidad"><br><br>
-                                      <button type="button" class="btn btn-success" id="addToCart">Mandar al Carrito</button>
-                                  </div>
-                                </div>
-                              
+                              <!-- Dentro del modal-body -->
+                  <div class="modal-body">
+                  <div class="card-body">
+      <h5 class="card-title">Mani</h5>
+      <p class="card-text"><b>Precio: $500 /gramo</b></p>
+      <input type="number" id="cantidad" placeholder="Ingrese la cantidad"><br><br>
+      <!-- Agregamos un identificador único para el producto -->
+      <input type="hidden" id="productoId" value="mani">
+      <button type="button" class="btn btn-success" id="addToCart">Mandar al Carrito</button>
+  </div>
+</div>
 
-                                <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Pedir</button>
-                                </div>
-                            </div>
+<script>
+document.getElementById('addToCart').addEventListener('click', function() {
+  var cantidad = document.getElementById('cantidad').value.trim();
+  var productoId = document.getElementById('productoId').value;
+
+  if (cantidad !== '') {
+      // Agregamos el identificador único al pedido
+      var xhr = new XMLHttpRequest();
+
+      xhr.open('POST', 'guardar_pedido.php', true);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+              console.log('Pedido agregado para el producto ' + productoId);
+          }
+      };
+      // Enviamos el identificador único junto con la cantidad
+      xhr.send('productoId=' + productoId + '&cantidad=' + cantidad);
+  } else {
+      alert('Por favor ingrese una cantidad');
+  }
+});
+</script>
+
                         </div>
                         </div>
                         <script>
                           document.getElementById('addToCart').addEventListener('click', function() {
                               var cantidad = document.getElementById('cantidad').value.trim();
-                      
+                              var productoId = document.getElementById('productoId').value;
+                          
                               if (cantidad !== '') {
+                                  // Agregamos el identificador único al pedido
                                   var xhr = new XMLHttpRequest();
-                      
+                          
                                   xhr.open('POST', 'guardar_pedido.php', true);
                                   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
                                   xhr.onreadystatechange = function() {
                                       if (xhr.readyState == 4 && xhr.status == 200) {
-                                          console.log('Pedido agregado');
+                                          console.log('Pedido agregado para el producto ' + productoId);
                                       }
                                   };
-                                  xhr.send('cantidad=' + cantidad);
+                                  // Enviamos el identificador único junto con la cantidad
+                                  xhr.send('productoId=' + productoId + '&cantidad=' + cantidad);
                               } else {
                                   alert('Por favor ingrese una cantidad');
                               }
                           });
-                        </script>
+                          </script>
                     </ul>
                 </div>
             </div>
