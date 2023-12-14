@@ -1,45 +1,41 @@
 <?php
-// Datos de conexión a la base de datos
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "dosificador_db";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "dosificador";
 
-// Crear conexión a la base de datos
-$conn = new mysqli($servername, $username, $password, $dbname);
+    $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Verificar la conexión
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
-
-if(isset($_POST['cantidad'])) {
-    // Utilizar sentencias preparadas para prevenir la inyección de SQL
-    $cantidad = mysqli_real_escape_string($conn, $_POST['cantidad']);
-
-    // Consulta preparada para insertar en la tabla pedidos
-    $sql = "INSERT INTO pedidos (cantidad) VALUES (?)";
-    $stmt = $conn->prepare($sql);
-
-    if ($stmt) {
-        // Asociar parámetros y ejecutar la consulta
-        $stmt->bind_param("s", $cantidad);
-
-        if ($stmt->execute()) {
-            echo "Cantidad insertada correctamente en la tabla pedidos";
-        } else {
-            echo "Error al insertar la cantidad en la tabla pedidos: " . $stmt->error;
-        }
-
-        // Cerrar la consulta preparada
-        $stmt->close();
-    } else {
-        echo "Error en la preparación de la consulta: " . $conn->error;
+    if ($conn->connect_error) {
+        die("Conexión fallida: " . $conn->connect_error);
     }
-} else {
-    echo "La cantidad no está definida en el formulario.";
-}
 
-// Cerrar la conexión a la base de datos
-$conn->close();
+    $sql_last_order = "SELECT MAX(num_pedido) AS last_order FROM pedidos";
+    $result = $conn->query($sql_last_order);
+    $last_order = 6; 
+    if ($result && $row = $result->fetch_assoc()) {
+        $last_order = $row['last_order'] + 1; 
+    }
+
+    $cantidad = $_POST['cantidad'];
+    $id_producto = $_POST['id_producto'];
+
+    $sql = "INSERT INTO pedidos (num_pedido, cantidad, id_producto) VALUES (?, ?, ?)";
+
+    $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        die("Error en la consulta: " . $conn->error);
+    }
+
+    $stmt->bind_param("iii", $last_order, $cantidad, $id_producto);
+    if ($stmt->execute() === true) {
+        echo "Datos guardados correctamente.";
+    } else {
+        echo "Error al guardar los datos: " . $stmt->error;
+    }
+
+    $stmt->close();
+    $conn->close();
+}
 ?>
